@@ -1,0 +1,12 @@
+line-length = 79
+indent-width = 4
+
+[lint]
+fixable = ["ALL"]
+unfixable = ["F401"]
+
+[format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
