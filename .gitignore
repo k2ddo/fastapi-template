@@ -12,6 +12,9 @@ wheels/
 # Environment variables
 .env
 
+# Database
+database.db
+
 # MacOS
 .DS_Store
 

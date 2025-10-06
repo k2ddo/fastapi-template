@@ -3,12 +3,17 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from core.orm.database import Base, database_url
+from core.orm.database import Base
 from core.orm.models import *
+from core.settings import settings
 
 config = context.config
 
-config.set_main_option('sqlalchemy.url', 'sqlite:///database.db')
+database_url = f'postgresql+psycopg2://{settings.DB_USER}:{settings.DB_PASSWORD}@localhost:5432/{settings.DB_NAME}'
+config.set_main_option(
+    'sqlalchemy.url',
+    database_url,
+)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

@@ -5,11 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "aiosqlite>=0.21.0",
     "alembic>=1.16.5",
+    "asyncpg>=0.30.0",
     "fastapi[standard]>=0.116.2",
     "greenlet>=3.2.4",
     "itsdangerous>=2.2.0",
+    "psycopg2>=2.9.10",
     "pydantic>=2.11.9",
     "pydantic-settings>=2.10.1",
     "sqladmin>=0.21.0",
