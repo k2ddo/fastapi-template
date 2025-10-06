@@ -1,5 +1,5 @@
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
 
@@ -13,5 +13,7 @@ class User(Base):
     last_name: Mapped[str | None] = mapped_column(String(64))
     password: Mapped[str]
 
-    def __repr__(self) -> str:
-        return f'User(id={self.id}, username={self.username}, first_name={self.first_name})'
+    things: Mapped[list['Thing']] = relationship(back_populates='owner')
+
+    def __str__(self) -> str:
+        return self.username

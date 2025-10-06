@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <link
+      href="/admin/static/css/output.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Django Unfold Custom Styles */
+      :root {
+        --unfold-bg-primary: rgb(18, 24, 39);
+        --unfold-bg-secondary: rgb(30, 41, 59);
+        --unfold-accent: rgb(167, 77, 253);
+        --unfold-accent-hover: rgb(147, 51, 234);
+        --unfold-border: rgba(255, 255, 255, 0.1);
+        --unfold-text-primary: rgb(255, 255, 255);
+        --unfold-text-secondary: rgb(156, 163, 175);
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    {% if admin.favicon_url %}
+    <link rel="icon" href="{{ admin.favicon_url }}" />
+    {% endif %} {% block head %} {% endblock %}
+    <title>{{ admin.title }}</title>
+  </head>
+
+  <body class="h-full bg-[rgb(18,24,39)] text-white antialiased">
+    {% block body %}
+    <main class="h-full">{% block main %} {% endblock %}</main>
+    {% endblock %}
+    <script
+      type="text/javascript"
+      src="{{ url_for('admin:statics', path='js/jquery.min.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('admin:statics', path='js/select2.full.min.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('admin:statics', path='js/flatpickr.min.js') }}"
+    ></script>
+    <script
+      type="text/javascript"
+      src="{{ url_for('admin:statics', path='js/main.js') }}"
+    ></script>
+    <script>
+      // Alpine.js for dropdowns and modals
+      document.addEventListener("DOMContentLoaded", function () {
+        // Handle dropdowns
+        document
+          .querySelectorAll("[data-dropdown-toggle]")
+          .forEach((button) => {
+            button.addEventListener("click", function () {
+              const dropdown = document.getElementById(
+                this.getAttribute("data-dropdown-toggle"),
+              );
+              dropdown.classList.toggle("hidden");
+            });
+          });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener("click", function (event) {
+          if (
+            !event.target.closest("[data-dropdown-toggle]") &&
+            !event.target.closest("[data-dropdown]")
+          ) {
+            document.querySelectorAll("[data-dropdown]").forEach((dropdown) => {
+              dropdown.classList.add("hidden");
+            });
+          }
+        });
+      });
+    </script>
+    {% block tail %} {% endblock %}
+  </body>
+</html>
