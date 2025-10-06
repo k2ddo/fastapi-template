@@ -1,8 +1,3 @@
-from fastapi import FastAPI
-
-app = FastAPI()
-
-
-@app.get('/')
-async def hello():
-    return {'Hello': 'World'}
+from core.admin import admin
+from core.api import app
+from core.settings import settings

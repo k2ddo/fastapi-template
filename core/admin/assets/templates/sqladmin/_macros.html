@@ -1,0 +1,142 @@
+{% macro menu_category(menu, request) %}
+{% if menu.is_visible(request) and menu.is_accessible(request) %}
+<div class="px-4 py-2">
+  <button class="w-full flex items-center justify-between px-3 py-2 rounded-md text-gray-200 hover:text-white bg-transparent hover:bg-[rgba(255,255,255,0.06)] border border-transparent hover:border-[rgba(255,255,255,0.12)] transition-colors focus:outline-none focus:ring-2 focus:ring-[rgb(167,77,253)] {% if menu.is_active(request) %}bg-[rgba(167,77,253,0.15)] text-white border-[rgba(167,77,253,0.35)]{% endif %}"
+          onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.fa-chevron-down').classList.toggle('rotate-180')">
+    <div class="flex items-center gap-3">
+      {% if menu.icon %}<i class="{{ menu.icon }} w-5 text-gray-400 group-hover:text-white {% if menu.is_active(request) %}text-[rgb(167,77,253)]{% endif %}"></i>{% endif %}
+      <span class="text-sm font-medium">{{ menu.display_name }}</span>
+    </div>
+    <i class="fas fa-chevron-down transition-transform text-gray-400"></i>
+  </button>
+  <div class="mt-1 space-y-1 {% if not menu.is_active(request) %}hidden{% endif %}">
+    {% for sub_menu in menu.children %}
+    {% if sub_menu.is_visible(request) and sub_menu.is_accessible(request) %}
+    <a class="block pl-10 pr-3 py-2 rounded-md text-gray-300 hover:text-white bg-transparent hover:bg-[rgba(255,255,255,0.05)] border border-transparent hover:border-[rgba(255,255,255,0.12)] transition-colors {% if sub_menu.is_active(request) %}bg-[rgba(167,77,253,0.12)] text-white border-[rgba(167,77,253,0.35)]{% endif %}"
+       href="{{ sub_menu.url(request) }}">
+      <div class="flex items-center gap-3">
+        {% if sub_menu.icon %}<i class="{{ sub_menu.icon }} w-4 text-gray-400 {% if sub_menu.is_active(request) %}text-[rgb(167,77,253)]{% endif %}"></i>{% endif %}
+        <span class="text-sm">{{ sub_menu.display_name }}</span>
+      </div>
+    </a>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro menu_item(menu, request) %}
+{% if menu.is_visible(request) and menu.is_accessible(request) %}
+<div class="px-4 py-1">
+  <a class="group flex items-center gap-3 px-3 py-2 rounded-md text-gray-200 hover:text-white bg-transparent hover:bg-[rgba(255,255,255,0.06)] border border-transparent hover:border-[rgba(255,255,255,0.12)] transition-colors focus:outline-none focus:ring-2 focus:ring-[rgb(167,77,253)] {% if menu.is_active(request) %}bg-[rgba(167,77,253,0.15)] text-white border-[rgba(167,77,253,0.35)]{% endif %}"
+     href="{{ menu.url(request) }}">
+    {% if menu.icon %}<i class="{{ menu.icon }} w-5 text-gray-400 group-hover:text-white {% if menu.is_active(request) %}text-[rgb(167,77,253)]{% endif %}"></i>{% endif %}
+    <span class="text-sm font-medium">{{ menu.display_name }}</span>
+  </a>
+  
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro display_menu(menu, request) %}
+<nav class="space-y-0.5">
+  {% for item in menu.items %}
+    {% if item.type_ == "View" %}
+      {{ menu_item(item, request) }}
+    {% elif item.type_ == "Category" %}
+      {{ menu_category(item, request) }}
+    {% endif %}
+    {% if not loop.last %}
+      <div class="mx-4 my-1 h-px bg-[rgba(255,255,255,0.08)]"></div>
+    {% endif %}
+  {% endfor %}
+</nav>
+{% endmacro %}
+
+{% macro render_field(field, kwargs={}) %}
+<div class="mb-4">
+  {{ field.label(
+    class_="block text-sm font-medium text-gray-300 mb-2" + (' after:content-["*"] after:ml-0.5 after:text-red-500' if field.flags.required else ''),
+    **({'title': "Обязательное поле"} if field.flags.required else {})
+  ) }}
+  <div>
+    {% if field.errors %}
+    {{ field(class_="w-full px-3 py-2 bg-[rgb(30,41,59)] border border-red-500 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent") }}
+    {% else %}
+    {{ field(class_="w-full px-3 py-2 bg-[rgb(30,41,59)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[rgb(167,77,253)] focus:border-transparent") }}
+    {% endif %}
+    {% for error in field.errors %}
+    <p class="mt-1 text-sm text-red-500">{{ error }}</p>
+    {% endfor %}
+    {% if field.description %}
+    <p class="mt-1 text-sm text-gray-400">{{ field.description }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro render_form_fields(form, form_opts=None) %}
+{% if form.hidden_tag is defined %}
+{{ form.hidden_tag() }}
+{% else %}
+{% for f in form if f.widget.input_type == 'hidden' %}
+{{ f }}
+{% endfor %}
+{% endif %}
+
+<div class="space-y-4">
+  {% for f in form if f.widget.input_type != 'hidden' %}
+  {{ render_field(f, kwargs) }}
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro render_table_actions() %}
+<div class="flex items-center space-x-2">
+  <button type="button" 
+          class="p-2 text-gray-400 hover:text-white hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
+          title="Просмотр">
+    <i class="fas fa-eye"></i>
+  </button>
+  <button type="button" 
+          class="p-2 text-gray-400 hover:text-white hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
+          title="Редактировать">
+    <i class="fas fa-edit"></i>
+  </button>
+  <button type="button" 
+          class="p-2 text-gray-400 hover:text-red-500 hover:bg-[rgba(255,255,255,0.1)] rounded-lg transition-colors"
+          title="Удалить">
+    <i class="fas fa-trash"></i>
+  </button>
+</div>
+{% endmacro %}
+
+{% macro render_pagination(pagination) %}
+<div class="w-full flex items-center justify-between gap-4 flex-wrap">
+  <p class="text-sm text-gray-400">
+    Показано <span class="font-medium text-white">{{ ((pagination.page - 1) * pagination.page_size) + 1 }}</span> - 
+    <span class="font-medium text-white">{{ min(pagination.page * pagination.page_size, pagination.count) }}</span> из 
+    <span class="font-medium text-white">{{ pagination.count }}</span> записей
+  </p>
+  
+  <nav class="flex items-center space-x-2">
+    <a href="{{ pagination.previous_page.url if pagination.has_previous else '#' }}"
+       class="px-3 py-2 text-sm rounded-lg {% if pagination.has_previous %}bg-[rgb(30,41,59)] text-white hover:bg-[rgba(255,255,255,0.1)]{% else %}bg-[rgba(255,255,255,0.05)] text-gray-500 cursor-not-allowed{% endif %} transition-colors">
+      <i class="fas fa-chevron-left mr-1"></i> Назад
+    </a>
+    
+    {% for page_control in pagination.page_controls %}
+    <a href="{{ page_control.url }}"
+       class="px-3 py-2 text-sm rounded-lg {% if page_control.number == pagination.page %}bg-[rgb(167,77,253)] text-white{% else %}bg-[rgb(30,41,59)] text-gray-300 hover:bg-[rgba(255,255,255,0.1)] hover:text-white{% endif %} transition-colors">
+      {{ page_control.number }}
+    </a>
+    {% endfor %}
+    
+    <a href="{{ pagination.next_page.url if pagination.has_next else '#' }}"
+       class="px-3 py-2 text-sm rounded-lg {% if pagination.has_next %}bg-[rgb(30,41,59)] text-white hover:bg-[rgba(255,255,255,0.1)]{% else %}bg-[rgba(255,255,255,0.05)] text-gray-500 cursor-not-allowed{% endif %} transition-colors">
+      Вперёд <i class="fas fa-chevron-right ml-1"></i>
+    </a>
+  </nav>
+</div>
+{% endmacro %}

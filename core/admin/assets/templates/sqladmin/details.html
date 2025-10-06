@@ -1,0 +1,127 @@
+{% extends "sqladmin/layout.html" %}
+{% block content %}
+<div class="max-w-6xl">
+  <div class="bg-[rgb(30,41,59)] rounded-lg border border-[rgba(255,255,255,0.1)]">
+    <div class="p-6 border-b border-[rgba(255,255,255,0.1)]">
+      <h3 class="text-xl font-semibold text-white">
+        {% for pk in model_view.pk_columns -%}
+        {{ pk.name }}
+        {%- if not loop.last %}, {% endif -%}
+        {% endfor %}: {{ get_object_identifier(model) }}
+      </h3>
+    </div>
+    
+    <div class="p-6">
+      <!-- Action Buttons -->
+      <div class="mb-6 flex flex-wrap items-center gap-3">
+        {% if model_view.can_edit %}
+        <a href="{{ model_view._build_url_for('admin:edit', request, model) }}"
+           class="px-4 py-2 bg-[rgb(167,77,253)] text-white rounded-lg hover:bg-[rgb(147,51,234)] transition-colors">
+          <i class="fas fa-edit mr-2"></i>Редактировать
+        </a>
+        {% endif %}
+        
+        {% if model_view.can_delete %}
+        <button type="button"
+                data-name="{{ model_view.name }}"
+                data-pk="{{ get_object_identifier(model) }}"
+                data-url="{{ model_view._url_for_delete(request, model) }}"
+                data-bs-toggle="modal"
+                data-bs-target="#modal-delete"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+          <i class="fas fa-trash mr-2"></i>Удалить
+        </button>
+        {% endif %}
+        
+        {% for custom_action, label in model_view._custom_actions_in_detail.items() %}
+        {% if custom_action in model_view._custom_actions_confirmation %}
+        <button type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#modal-confirmation-{{ custom_action }}"
+                class="px-4 py-2 bg-[rgb(30,41,59)] border border-[rgba(255,255,255,0.1)] text-white rounded-lg hover:bg-[rgba(255,255,255,0.1)] transition-colors">
+          {{ label }}
+        </button>
+        {% else %}
+        <a href="{{ model_view._url_for_action(request, custom_action) }}?pks={{ get_object_identifier(model) }}"
+           class="px-4 py-2 bg-[rgb(30,41,59)] border border-[rgba(255,255,255,0.1)] text-white rounded-lg hover:bg-[rgba(255,255,255,0.1)] transition-colors">
+          {{ label }}
+        </a>
+        {% endif %}
+        {% endfor %}
+        
+        <a href="{{ url_for('admin:list', identity=model_view.identity) }}"
+           class="ml-auto px-4 py-2 text-gray-400 hover:text-white transition-colors">
+          <i class="fas fa-arrow-left mr-2"></i>Назад к списку
+        </a>
+      </div>
+      
+      <!-- Details Table -->
+      <div class="overflow-hidden rounded-lg border border-[rgba(255,255,255,0.1)]">
+        <table class="min-w-full divide-y divide-[rgba(255,255,255,0.1)]">
+          <tbody class="divide-y divide-[rgba(255,255,255,0.05)]">
+            {% for name in model_view._details_prop_names %}
+            {% set label = model_view._column_labels.get(name, name) %}
+            {% set value, formatted_value = model_view.get_detail_value(model, name) %}
+            <tr class="hover:bg-[rgba(255,255,255,0.05)] transition-colors">
+              <td class="px-6 py-4 text-sm font-medium text-gray-400 bg-[rgba(255,255,255,0.02)] w-1/3">
+                {{ label }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-300">
+                {% if name in model_view._relation_names %}
+                  {% if is_list(value) %}
+                    <div class="space-y-1">
+                      {% for elem, formatted_elem in zip(value, formatted_value) %}
+                      <a href="{{ model_view._build_url_for('admin:details', request, elem) }}"
+                         class="inline-block px-2 py-1 bg-[rgba(167,77,253,0.2)] text-[rgb(167,77,253)] rounded hover:bg-[rgba(167,77,253,0.3)] transition-colors">
+                        {{ formatted_elem }}
+                      </a>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    {% if value %}
+                    <a href="{{ model_view._url_for_details_with_prop(request, model, name) }}"
+                       class="text-[rgb(167,77,253)] hover:text-[rgb(147,51,234)] transition-colors">
+                      {{ formatted_value }}
+                    </a>
+                    {% else %}
+                      <span class="text-gray-500">{{ formatted_value }}</span>
+                    {% endif %}
+                  {% endif %}
+                {% else %}
+                  {% if formatted_value == 'True' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900/20 text-green-400">
+                      <i class="fas fa-check mr-1"></i>Да
+                    </span>
+                  {% elif formatted_value == 'False' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900/20 text-red-400">
+                      <i class="fas fa-times mr-1"></i>Нет
+                    </span>
+                  {% elif formatted_value == 'None' or formatted_value == '' %}
+                    <span class="text-gray-500 italic">Не указано</span>
+                  {% else %}
+                    {{ formatted_value }}
+                  {% endif %}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modals -->
+{% if model_view.can_delete %}
+{% include 'sqladmin/modals/delete.html' %}
+{% endif %}
+
+{% for custom_action in model_view._custom_actions_in_detail %}
+{% if custom_action in model_view._custom_actions_confirmation %}
+{% with confirmation_message = model_view._custom_actions_confirmation[custom_action], custom_action=custom_action, url=model_view._url_for_action(request, custom_action) + '?pks=' + (get_object_identifier(model) | string) %}
+{% include 'sqladmin/modals/details_action_confirmation.html' %}
+{% endwith %}
+{% endif %}
+{% endfor %}
+{% endblock %}

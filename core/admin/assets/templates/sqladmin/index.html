@@ -1,0 +1,104 @@
+{% extends "sqladmin/layout.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+  <!-- Welcome Card -->
+  <div class="bg-gradient-to-r from-[rgb(167,77,253)] to-[rgb(147,51,234)] rounded-lg p-8 mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Добро пожаловать в панель администратора</h1>
+    <p class="text-white/80 text-lg">Управляйте вашими данными быстро и эффективно</p>
+  </div>
+  
+  <!-- Quick Actions -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-white mb-4">Быстрые действия</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for item in admin._menu.items %}
+        {% if item.type_ == "View" and item.is_visible(request) and item.is_accessible(request) %}
+        <a href="{{ item.url(request) }}" 
+           class="group bg-[rgb(30,41,59)] rounded-lg p-6 border border-[rgba(255,255,255,0.1)] hover:border-[rgb(167,77,253)] transition-all">
+          <div class="flex items-center space-x-4">
+            {% if item.icon %}
+            <div class="p-3 bg-[rgba(167,77,253,0.2)] rounded-lg group-hover:bg-[rgba(167,77,253,0.3)] transition-colors">
+              <i class="{{ item.icon }} text-[rgb(167,77,253)] text-xl"></i>
+            </div>
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-semibold text-white group-hover:text-[rgb(167,77,253)] transition-colors">
+                {{ item.display_name }}
+              </h3>
+              <p class="text-sm text-gray-400">Управление записями</p>
+            </div>
+          </div>
+        </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Information Cards -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Getting Started -->
+    <div class="bg-[rgb(30,41,59)] rounded-lg border border-[rgba(255,255,255,0.1)]">
+      <div class="p-6 border-b border-[rgba(255,255,255,0.1)]">
+        <h2 class="text-xl font-semibold text-white flex items-center">
+          <i class="fas fa-rocket text-[rgb(167,77,253)] mr-3"></i>
+          Начало работы
+        </h2>
+      </div>
+      <div class="p-6">
+        <ul class="space-y-3">
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+            <div>
+              <p class="text-white font-medium">Просмотр данных</p>
+              <p class="text-sm text-gray-400">Используйте боковое меню для навигации по моделям</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+            <div>
+              <p class="text-white font-medium">Создание записей</p>
+              <p class="text-sm text-gray-400">Нажмите "Добавить" на странице списка модели</p>
+            </div>
+          </li>
+          <li class="flex items-start">
+            <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+            <div>
+              <p class="text-white font-medium">Фильтрация и поиск</p>
+              <p class="text-sm text-gray-400">Используйте фильтры и поиск для быстрого доступа к данным</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- System Info -->
+    <div class="bg-[rgb(30,41,59)] rounded-lg border border-[rgba(255,255,255,0.1)]">
+      <div class="p-6 border-b border-[rgba(255,255,255,0.1)]">
+        <h2 class="text-xl font-semibold text-white flex items-center">
+          <i class="fas fa-info-circle text-[rgb(167,77,253)] mr-3"></i>
+          Информация о системе
+        </h2>
+      </div>
+      <div class="p-6">
+        <dl class="space-y-3">
+          <div>
+            <dt class="text-sm text-gray-400">Название системы</dt>
+            <dd class="text-white font-medium">{{ admin.title }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-400">Количество моделей</dt>
+            <dd class="text-white font-medium">{{ admin._views|length }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-400">Версия</dt>
+            <dd class="text-white font-medium">Avtukh Admin + FastAPI</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block dashboard_content %}
+{% endblock %}
+{% endblock %}
