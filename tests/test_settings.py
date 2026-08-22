@@ -9,6 +9,7 @@ def test_rejects_short_secrets() -> None:
         Settings.model_validate(
             {
                 'SECRET_KEY': 'short',
+                'JWT_SECRET_KEY': 'short',
                 'ADMIN_USERNAME': 'admin',
                 'ADMIN_PASSWORD': 'short',
             }

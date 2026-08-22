@@ -6,8 +6,8 @@ panel, validated environment settings, health checks, tests, CI, and a
 non-root Docker image.
 
 This repository is infrastructure and an example domain, not a complete
-application. Replace or protect the sample `/api/v1/users` routes according to
-your authorization model before storing real user data.
+application. It provides a secure authentication baseline; adapt its users and
+authorization rules to the domain of your service.
 
 ## Stack
 
@@ -23,6 +23,7 @@ your authorization model before storing real user data.
 
 - secrets and deployment-specific values come from environment variables;
 - passwords are hashed with Argon2 and never returned by the API;
+- OAuth2 password login issues short-lived, signed JWT access tokens;
 - admin login uses configured credentials and a signed session;
 - database sessions roll back on errors and the connection pool is disposed
   during graceful shutdown;
@@ -39,11 +40,12 @@ Requirements: Docker with Compose.
 
 ```bash
 cp .env.example .env
-openssl rand -hex 32
+openssl rand -hex 32  # SECRET_KEY
+openssl rand -hex 32  # JWT_SECRET_KEY
 ```
 
-Put the generated value in `SECRET_KEY`, replace `ADMIN_PASSWORD`, and add a
-database password to `.env`:
+Put the generated values in their corresponding variables, replace
+`ADMIN_PASSWORD`, and add a database password to `.env`:
 
 ```dotenv
 POSTGRES_PASSWORD=replace-with-a-random-database-password
@@ -106,6 +108,8 @@ secrets are missing or too short.
 | `DATABASE_URL` | SQLAlchemy async PostgreSQL URL | local PostgreSQL |
 | `DATABASE_ECHO` | SQL query logging | `false` |
 | `SECRET_KEY` | Session-signing secret, at least 32 characters | required |
+| `JWT_SECRET_KEY` | Separate JWT-signing secret, at least 32 characters | required |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Access-token lifetime, from 1 to 1440 minutes | `30` |
 | `ADMIN_ENABLED` | Enable SQLAdmin | `true` |
 | `ADMIN_USERNAME` | SQLAdmin login | required |
 | `ADMIN_PASSWORD` | SQLAdmin password, at least 12 characters | required |
@@ -123,8 +127,9 @@ ALLOWED_HOSTS=["api.example.com"]
 
 - `GET /health/live` — process liveness; does not contact PostgreSQL
 - `GET /health/ready` — readiness; returns `503` when PostgreSQL is unavailable
-- `GET /api/v1/users?offset=0&limit=100` — paginated example listing
-- `POST /api/v1/users` — example user creation with Argon2 password hashing
+- `POST /api/v1/users` — user registration with Argon2 password hashing
+- `POST /api/v1/auth/token` — OAuth2 password login and JWT issuance
+- `GET /api/v1/users/me` — current user; requires a bearer token
 - `/admin` — authenticated SQLAdmin interface when enabled
 
 ## Project layout
@@ -154,8 +159,9 @@ Before deploying a real service:
    only the required `CORS_ORIGINS`.
 2. Disable the admin panel if it is not needed. Otherwise restrict it at the
    network or reverse-proxy level in addition to its login.
-3. Add application-specific authentication and authorization to private API
-   routes. The sample user listing is intentionally not an auth framework.
+3. Add domain-specific roles/scopes and authorization checks beyond the
+   included authenticated-user baseline, and rate-limit the token endpoint at
+   the gateway or application layer.
 4. Terminate TLS at a trusted load balancer or reverse proxy and only trust
    forwarded headers from that proxy.
 5. Run `alembic upgrade head` once as a release step before starting replicas;

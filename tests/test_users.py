@@ -2,7 +2,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from core.api.routers.user import create_user, password_hash
+from core.api.routers.user import create_user
+from core.api.security import password_hash
 from core.orm.models import User
 from core.schemas.user import CreateUserSchema
 

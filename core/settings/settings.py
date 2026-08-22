@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     DATABASE_ECHO: bool = False
 
     SECRET_KEY: SecretStr = Field(min_length=32)
+    JWT_SECRET_KEY: SecretStr = Field(min_length=32)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, ge=1, le=1440)
     ADMIN_ENABLED: bool = True
     ADMIN_USERNAME: str = Field(min_length=1)
     ADMIN_PASSWORD: SecretStr = Field(min_length=12)

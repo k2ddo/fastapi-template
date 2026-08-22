@@ -11,7 +11,7 @@ from ..admin import create_admin
 from ..orm.database import engine
 from ..settings import settings
 from ..settings.logging import configure_logging
-from .routers import health, user
+from .routers import auth, health, user
 
 ADMIN_STATIC_DIR = Path(__file__).parents[1] / 'admin' / 'assets' / 'static'
 configure_logging(settings.LOG_LEVEL)
@@ -46,6 +46,7 @@ def create_app() -> FastAPI:
         app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS)
 
     app.include_router(health.router)
+    app.include_router(auth.router, prefix=settings.API_PREFIX)
     app.include_router(user.router, prefix=settings.API_PREFIX)
 
     if settings.ADMIN_ENABLED:

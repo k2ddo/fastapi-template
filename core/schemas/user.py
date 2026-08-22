@@ -10,6 +10,11 @@ class PublicUserSchema(BaseModel):
     last_name: str | None = None
 
 
+class TokenSchema(BaseModel):
+    access_token: str
+    token_type: str = 'bearer'  # noqa: S105
+
+
 class CreateUserSchema(BaseModel):
     username: str = Field(min_length=3, max_length=32, pattern=r'^[a-zA-Z0-9_.-]+$')
     first_name: str = Field(min_length=1, max_length=64)

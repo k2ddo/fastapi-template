@@ -1,6 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status
-from pwdlib import PasswordHash
-from sqlalchemy import select
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from ...orm.models import User
@@ -9,21 +7,14 @@ from ...schemas.user import (
     PublicUserSchema,
 )
 from ..dependencies import SessionDep
+from ..security import CurrentUserDep, password_hash
 
 router = APIRouter(prefix='/users', tags=['users'])
-password_hash = PasswordHash.recommended()
 
 
-@router.get('', response_model=list[PublicUserSchema])
-async def get_users(
-    session: SessionDep,
-    offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=100, ge=1, le=100),
-):
-    results = await session.scalars(
-        select(User).order_by(User.id).offset(offset).limit(limit)
-    )
-    return results.all()
+@router.get('/me', response_model=PublicUserSchema)
+async def get_current_user(user: CurrentUserDep) -> User:
+    return user
 
 
 @router.post('', response_model=PublicUserSchema, status_code=status.HTTP_201_CREATED)
