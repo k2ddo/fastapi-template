@@ -1,9 +1,16 @@
-line-length = 79
+line-length = 88
 indent-width = 4
+target-version = "py313"
 
 [lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC", "S", "RUF"]
 fixable = ["ALL"]
-unfixable = ["F401"]
+unfixable = []
+
+[lint.per-file-ignores]
+"core/admin/views/*.py" = ["RUF012"]
+"core/orm/migrations/versions/*.py" = ["E501"]
+"tests/*.py" = ["S101", "S105", "S106"]
 
 [format]
 quote-style = "single"

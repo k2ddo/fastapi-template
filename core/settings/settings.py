@@ -1,21 +1,41 @@
-from pathlib import Path
+from functools import lru_cache
+from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-BASE_DIR = Path(__file__).parent.parent
-
-print(BASE_DIR)
 
 
 class Settings(BaseSettings):
-    DB_NAME: str = Field(default=...)
-    DB_USER: str = Field(default=...)
-    DB_PASSWORD: str = Field(default=...)
+    APP_NAME: str = 'FastAPI Template'
+    APP_ENV: Literal['development', 'test', 'production'] = 'development'
+    DEBUG: bool = False
+    LOG_LEVEL: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = 'INFO'
+    API_PREFIX: str = '/api/v1'
 
-    SECRET_KEY: str = Field(default=...)
+    DATABASE_URL: str = Field(
+        default='postgresql+asyncpg://postgres:postgres@localhost:5432/app'
+    )
+    DATABASE_ECHO: bool = False
 
-    model_config = SettingsConfigDict(env_file='.env')
+    SECRET_KEY: SecretStr = Field(min_length=32)
+    ADMIN_ENABLED: bool = True
+    ADMIN_USERNAME: str = Field(min_length=1)
+    ADMIN_PASSWORD: SecretStr = Field(min_length=12)
+
+    CORS_ORIGINS: list[str] = Field(default_factory=list)
+    ALLOWED_HOSTS: list[str] = Field(default_factory=lambda: ['*'])
+
+    model_config = SettingsConfigDict(
+        env_file='.env',
+        env_file_encoding='utf-8',
+        env_ignore_empty=True,
+        extra='ignore',
+    )
 
 
-settings = Settings()
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()  # pyright: ignore[reportCallIssue]
+
+
+settings = get_settings()

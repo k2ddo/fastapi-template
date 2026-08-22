@@ -1,22 +1,17 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PublicUserSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     username: str
     first_name: str
-    last_name: str | None
+    last_name: str | None = None
 
 
 class CreateUserSchema(BaseModel):
-    username: str
-    first_name: str
-    last_name: str | None
-    password: str
-
-
-class UpdateUserSchema(BaseModel):
-    username: str | None
-    first_name: str | None
-    last_name: str | None
-    password: str | None
+    username: str = Field(min_length=3, max_length=32, pattern=r'^[a-zA-Z0-9_.-]+$')
+    first_name: str = Field(min_length=1, max_length=64)
+    last_name: str | None = None
+    password: str = Field(min_length=12, max_length=128)

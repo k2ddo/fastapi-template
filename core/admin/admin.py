@@ -1,20 +1,24 @@
-from sqladmin import Admin
-import os
+from pathlib import Path
 
-from ..api import app
+from fastapi import FastAPI
+from sqladmin import Admin
+
 from ..orm import engine
+from ..settings import settings
 from .auth import authentication_backend
 from .views import ThingAdmin, UserAdmin
 
-# Получаем путь к папке assets относительно текущего файла
-assets_dir = os.path.join(os.path.dirname(__file__), 'assets')
+ASSETS_DIR = Path(__file__).parent / 'assets'
 
-admin = Admin(
-    app,
-    engine,
-    title='Шаблон FastAPI',
-    authentication_backend=authentication_backend,
-    templates_dir=os.path.join(assets_dir, 'templates'),
-)
-admin.add_view(UserAdmin)
-admin.add_view(ThingAdmin)
+
+def create_admin(app: FastAPI) -> Admin:
+    admin = Admin(
+        app,
+        engine,
+        title=settings.APP_NAME,
+        authentication_backend=authentication_backend,
+        templates_dir=str(ASSETS_DIR / 'templates'),
+    )
+    admin.add_view(UserAdmin)
+    admin.add_view(ThingAdmin)
+    return admin

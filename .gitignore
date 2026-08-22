@@ -5,12 +5,19 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
-.venv
+.venv/
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # Database
 database.db
@@ -21,3 +28,5 @@ database.db
 # Logs
 *.log
 *.zip
+.idea/
+.vscode/
